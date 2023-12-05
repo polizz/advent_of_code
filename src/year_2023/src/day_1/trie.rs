@@ -1,5 +1,24 @@
 use std::borrow::{Borrow, BorrowMut};
 
+#[derive(Debug)]
+pub enum TrieOption<T> {
+    Value(Option<T>),
+    Empty,
+    None,
+}
+
+impl<T> TrieOption<T>
+where
+    T: Copy + Clone,
+{
+    pub fn unwrap(&self) -> Option<T> {
+        match *self {
+            TrieOption::Value(Some(val)) => Some(val),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct TrieNode<T> {
     pub value: Option<T>,
@@ -22,7 +41,7 @@ impl<T> TrieNode<T>
 where
     T: Clone,
 {
-    fn add_str_recurse(&mut self, st: &[char], k: usize, value: T) {
+    pub fn add_str_recurse(&mut self, st: &[char], k: usize, value: T) {
         if k == st.len() {
             self.value = Some(value);
 
@@ -63,12 +82,18 @@ where
         false
     }
 
-    fn get_value_r(&self, st: &[char], k: usize) -> Option<T> {
+    pub fn get_value_r(&self, st: &[char], k: usize) -> TrieOption<T> {
         if k == st.len() {
-            return self.value.clone();
+            if self.value.is_some() {
+                return TrieOption::Value(self.value.clone());
+            }
+            return TrieOption::Empty;
+            // return self.value.clone();
         }
 
+        // println!("k:{}, st:{:?}", k, &st);
         let c = st[k];
+        // println!("c: {c}");
         let char_index = c as usize - 61 - 36;
 
         let child = &self.children[char_index];
@@ -77,12 +102,12 @@ where
             return child_bor.get_value_r(st, k + 1);
         }
 
-        None
+        TrieOption::None
     }
 }
 
 #[derive(Debug)]
-pub(crate) struct Trie<T> {
+pub struct Trie<T> {
     pub(crate) root: TrieNode<T>,
 }
 
@@ -103,7 +128,7 @@ where
         self.root.has_string_r(st_chars, 0)
     }
 
-    pub fn get_value(&self, st: &str) -> Option<T> {
+    pub fn get_value(&self, st: &str) -> TrieOption<T> {
         let st: Vec<char> = st.chars().collect();
         let st_chars = st.as_slice();
 
@@ -135,8 +160,8 @@ mod tests {
 
         // println!("has_string: {}", t.has_string(&"Ash".to_lowercase()));
 
-        assert_eq!(32, search_val.unwrap());
-        assert_eq!(1, search_val_not_found.unwrap());
+        assert_eq!(32, search_val.unwrap().unwrap());
+        assert_eq!(1, search_val_not_found.unwrap().unwrap());
 
         assert_eq!(true, t.has_string(&"Ash".to_lowercase()));
         assert_eq!(false, t.has_string(&"Ashleyyo".to_lowercase()));
