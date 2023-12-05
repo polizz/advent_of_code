@@ -3,13 +3,6 @@
 version = 3
 
 [[package]]
-name = "advent_of_code"
-version = "0.1.0"
-dependencies = [
- "cy2023",
-]
-
-[[package]]
 name = "anyhow"
 version = "1.0.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
