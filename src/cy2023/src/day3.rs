@@ -1,5 +1,5 @@
 // sum of all part numbers that are touching a non-period symbol
-
+#![allow(non_snake_case)]
 #![allow(dead_code)]
 #![allow(unused_assignments)]
 use std::collections::{HashSet, VecDeque};
