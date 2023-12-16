@@ -1,4 +1,6 @@
-pub fn get_winning_wait_times(races: impl Iterator<Item = RaceStat>) -> Vec<Vec<usize>> {
+#![allow(unused)]
+
+fn get_winning_wait_times(races: impl Iterator<Item = RaceStat>) -> Vec<Vec<usize>> {
     races
         // .inspect(|x| println!("x: {:?}", x))
         .filter_map(
@@ -28,7 +30,7 @@ pub fn get_winning_wait_times(races: impl Iterator<Item = RaceStat>) -> Vec<Vec<
         .collect::<Vec<Vec<usize>>>()
 }
 
-pub fn get_race_stats2<'a>(input: &'a str) -> impl Iterator<Item = RaceStat> + 'a {
+fn get_race_stats2<'a>(input: &'a str) -> impl Iterator<Item = RaceStat> + 'a {
     let mut lines = input.lines();
     let times = lines.next().unwrap().split_whitespace();
     let durations = lines.next().unwrap().split_whitespace();
@@ -51,7 +53,7 @@ pub fn get_race_stats2<'a>(input: &'a str) -> impl Iterator<Item = RaceStat> + '
     .into_iter()
 }
 
-pub fn get_race_stats<'a>(input: &'a str) -> impl Iterator<Item = RaceStat> + 'a {
+fn get_race_stats<'a>(input: &'a str) -> impl Iterator<Item = RaceStat> + 'a {
     let mut lines = input.lines();
     let times = lines.next().unwrap().split_whitespace();
     let durations = lines.next().unwrap().split_whitespace();
@@ -63,7 +65,7 @@ pub fn get_race_stats<'a>(input: &'a str) -> impl Iterator<Item = RaceStat> + 'a
 }
 
 #[derive(Debug)]
-pub struct RaceStat {
+struct RaceStat {
     duration: usize,
     max_distance: usize,
 }
