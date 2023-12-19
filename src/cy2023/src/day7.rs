@@ -15,7 +15,7 @@ use std::slice;
 
 use lsd_sort::*;
 
-fn get_total_winnings(
+pub fn get_total_winnings(
     input: String,
     radix_sort_map: Option<&HashMap<char, char>>,
     use_wildcards: bool,
@@ -23,7 +23,6 @@ fn get_total_winnings(
     let mut hands = parse_file(input);
     identify_hand_types(&mut hands, use_wildcards);
     let mut partitions = paritition_hands_by_type(hands);
-    println!("High Card: {:#?}", &partitions[1]);
     let total_winnings = radix_sort_partitions(&mut partitions, radix_sort_map);
 
     total_winnings
@@ -143,7 +142,6 @@ fn convert_card_hash_to_handtype(
     let mut jacks_number = 0usize;
     if use_wildcards {
         if let Some((_, number)) = card_hash.get_key_value(&'J') {
-            println!("Jacks: {}", number);
             jacks_number = *number;
             card_hash.remove(&'J');
         }
@@ -224,50 +222,52 @@ impl Default for Hand {
     }
 }
 
+pub fn get_card_overrides_part2() -> HashMap<char, char> {
+    // ascending order is J, 2...9, T, Q, K, A
+    // so we want normal alphanumerical ASCII ordering by bytecode
+    // to change T, Q, and A ordering
+    let mut override_sort: HashMap<char, char> = HashMap::new();
+    override_sort.insert('T' as char, 'A' as char);
+    override_sort.insert('A' as char, 'T' as char);
+    override_sort.insert('Q' as char, 'K' as char);
+    override_sort.insert('K' as char, 'L' as char);
+    override_sort.insert('J' as char, '1' as char);
+    // ASCII code for '1' ranks lower than any
+    // alpha or other number
+    override_sort
+}
+
+pub fn get_card_overrides_part1() -> HashMap<char, char> {
+    // ascending order is 2...9, T, J, Q, K, A
+    // so we want normal alphanumerical ASCII ordering by bytecode
+    // to change T, Q, and A ordering
+    let mut override_sort: HashMap<char, char> = HashMap::new();
+    override_sort.insert('T' as char, 'A' as char);
+    override_sort.insert('A' as char, 'T' as char);
+    override_sort.insert('Q' as char, 'K' as char);
+    override_sort.insert('K' as char, 'L' as char);
+    override_sort
+}
+
+use std::fs::File;
+use std::io::prelude::*;
+pub fn load_file(path: &str) -> String {
+    let mut file = File::open(path).unwrap();
+    let mut file_contents = String::new();
+    let _ = file.read_to_string(&mut file_contents);
+    file_contents
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::fs::File;
     use std::io::prelude::*;
 
-    fn get_card_overrides_part2() -> HashMap<char, char> {
-        // ascending order is J, 2...9, T, Q, K, A
-        // so we want normal alphanumerical ASCII ordering by bytecode
-        // to change T, Q, and A ordering
-        let mut override_sort: HashMap<char, char> = HashMap::new();
-        override_sort.insert('T' as char, 'A' as char);
-        override_sort.insert('A' as char, 'T' as char);
-        override_sort.insert('Q' as char, 'K' as char);
-        override_sort.insert('K' as char, 'L' as char);
-        override_sort.insert('J' as char, '1' as char);
-        // ASCII code for '1' ranks lower than any
-        // alpha or other number
-        override_sort
-    }
-
-    fn get_card_overrides_part1() -> HashMap<char, char> {
-        // ascending order is 2...9, T, J, Q, K, A
-        // so we want normal alphanumerical ASCII ordering by bytecode
-        // to change T, Q, and A ordering
-        let mut override_sort: HashMap<char, char> = HashMap::new();
-        override_sort.insert('T' as char, 'A' as char);
-        override_sort.insert('A' as char, 'T' as char);
-        override_sort.insert('Q' as char, 'K' as char);
-        override_sort.insert('K' as char, 'L' as char);
-        override_sort
-    }
-
-    fn load_file() -> String {
-        let mut file = File::open("src/fixtures/day7.txt").unwrap();
-        let mut file_contents = String::new();
-        let _ = file.read_to_string(&mut file_contents);
-        file_contents
-    }
-
     #[test]
     fn day7_file2() {
         let start = std::time::Instant::now();
-        let input = load_file();
+        let input = load_file("src/fixtures/day7.txt");
 
         let mut ht = get_card_overrides_part2();
         let total_winnings = get_total_winnings(input, Some(&ht), true);
@@ -296,7 +296,7 @@ QQQJA 483"#;
     #[test]
     fn day7_file() {
         let start = std::time::Instant::now();
-        let input = load_file();
+        let input = load_file("src/fixtures/day7.txt");
 
         let mut ht = get_card_overrides_part1();
         let total_winnings = get_total_winnings(input, Some(&ht), false);

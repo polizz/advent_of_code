@@ -6,14 +6,9 @@ use std::collections::HashMap;
 
 fn check_override_mapping(map: &HashMap<char, char>, c: usize) -> usize {
     if let Some(resultant) = map.get(&(c as u8 as char)) {
-        // println!(
-        //     "Mappped:{} to {}, index will be:{}",
-        //     c as u8 as char, *resultant as usize as u8 as char, *resultant as usize
-        // );
         return *resultant as usize;
     }
 
-    // println!("No map:{}", c as u8 as char);
     c
 }
 
@@ -30,9 +25,12 @@ fn get_object_str_repr(hand: Hand) -> String {
 
 pub(crate) fn sort_hands(mut array: &mut Vec<Hand>, override_sort: Option<&HashMap<char, char>>) {
     let R = 256;
-    let mut aux: Vec<Hand> = vec![Hand::default(); R + 1];
     let n_char = array[0].cards.len();
     let n_str = array.len();
+    let mut aux: Vec<Hand> = vec![Hand::default(); n_str];
+
+    let mut pt_aux = aux.as_mut_ptr();
+    let mut pt_arr = array.as_mut_ptr();
 
     // for each char in the fixed-length strings
     for c in (0..n_char).rev() {
@@ -41,12 +39,10 @@ pub(crate) fn sort_hands(mut array: &mut Vec<Hand>, override_sort: Option<&HashM
         // compute frequency counts for this letter slot for all strings
         for f in 0..n_str {
             // get any overriden index for this the letters in this slot
-
             let mapped_idx = override_sort.as_ref().map_or_else(
                 || array[f].cards.clone().into_bytes()[c] as usize + 1,
-                |map| check_override_mapping(&map, array[f].cards.clone().into_bytes()[c] as usize), //+ 1),
+                |map| check_override_mapping(&map, array[f].cards.clone().into_bytes()[c] as usize),
             );
-
             counts[mapped_idx + 1] += 1;
         }
 
@@ -59,24 +55,18 @@ pub(crate) fn sort_hands(mut array: &mut Vec<Hand>, override_sort: Option<&HashM
         for m in 0..n_str {
             let mapped_idx = override_sort.as_ref().map_or_else(
                 || array[m].cards.clone().into_bytes()[c] as usize + 1,
-                |map| check_override_mapping(&map, array[m].cards.clone().into_bytes()[c] as usize), //+ 1),
+                |map| check_override_mapping(&map, array[m].cards.clone().into_bytes()[c] as usize),
             );
-
             unsafe {
-                let pt = aux.as_mut_ptr().add(counts[mapped_idx]);
-                let at = array.as_mut_ptr().add(m);
-                std::ptr::swap(at, pt);
+                std::ptr::swap(pt_arr.add(m), pt_aux.add(counts[mapped_idx]));
             }
-
             counts[mapped_idx] += 1;
         }
 
         // move data back to original array
-        for c in 0..n_str {
-            unsafe {
-                let pt = aux.as_mut_ptr().add(c);
-                let at = array.as_mut_ptr().add(c);
-                std::ptr::swap(at, pt);
+        unsafe {
+            for b in 0..n_str {
+                std::ptr::swap(pt_arr.add(b), pt_aux.add(b));
             }
         }
     }
