@@ -209,7 +209,7 @@ fn calculate_approx_distances(expanded_map: GalacticCoordinates) -> usize {
 
         loop {
             if nav_point.0 != dst_x {
-                for x in 0..step_x {
+                for _x in 0..step_x {
                     total_steps += 1;
 
                     if x_sign {
@@ -229,7 +229,7 @@ fn calculate_approx_distances(expanded_map: GalacticCoordinates) -> usize {
             }
 
             if nav_point.1 != dst_y {
-                for y in 0..step_y {
+                for _y in 0..step_y {
                     total_steps += 1;
 
                     if y_sign {

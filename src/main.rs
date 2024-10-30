@@ -1,6 +1,8 @@
 // use cy2023::{get_card_overrides_part1, get_card_overrides_part2, get_total_winnings, load_file};
+use cy2023::day12::day12_part2_preunfold;
 
 fn main() {
+    day12_part2_preunfold();
     // let start = std::time::Instant::now();
     // let input = load_file("src/cy2023/src/fixtures/day7.txt");
     //
